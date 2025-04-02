@@ -29,18 +29,34 @@ public class StudentEndpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getStudentRequest")
     @ResponsePayload
     public GetStudentResponse getStudent(@RequestPayload GetStudentRequest request) {
+        logger.debug("Received getStudent request for id: {}", request.getId());
         GetStudentResponse response = new GetStudentResponse();
-        Student student = studentService.getStudent(request.getStudentId());
-        response.setStudent(student);
+        
+        Student student = studentService.getStudent(request.getId());
+        response.setId(student.getId());
+        response.setName(student.getName());
+        response.setAge(student.getAge());
+        response.setGrade(student.getGrade());
+        
         return response;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getAllStudentsRequest")
     @ResponsePayload
     public GetAllStudentsResponse getAllStudents(@RequestPayload GetAllStudentsRequest request) {
+        logger.debug("Received getAllStudents request");
         GetAllStudentsResponse response = new GetAllStudentsResponse();
+        
         List<Student> students = studentService.getAllStudents();
-        response.setStudents(students);
+        for (Student student : students) {
+            GetAllStudentsResponse.StudentInfo studentInfo = new GetAllStudentsResponse.StudentInfo();
+            studentInfo.setId(student.getId());
+            studentInfo.setName(student.getName());
+            studentInfo.setAge(student.getAge());
+            studentInfo.setGrade(student.getGrade());
+            response.getStudents().add(studentInfo);
+        }
+        
         return response;
     }
 
@@ -50,20 +66,19 @@ public class StudentEndpoint {
         logger.debug("Received addStudent request: {}", request);
         
         try {
-            if (request == null || request.getStudent() == null) {
-                logger.error("Student cannot be null");
-                throw new IllegalArgumentException("Student cannot be null");
+            if (request == null) {
+                logger.error("Request cannot be null");
+                throw new IllegalArgumentException("Request cannot be null");
             }
 
-            Student requestStudent = request.getStudent();
             logger.debug("Processing student: name={}, age={}, grade={}", 
-                requestStudent.getName(), requestStudent.getAge(), requestStudent.getGrade());
+                request.getName(), request.getAge(), request.getGrade());
 
             // Create new Student instance for saving
             Student newStudent = new Student();
-            newStudent.setName(requestStudent.getName());
-            newStudent.setAge(requestStudent.getAge());
-            newStudent.setGrade(requestStudent.getGrade());
+            newStudent.setName(request.getName());
+            newStudent.setAge(request.getAge());
+            newStudent.setGrade(request.getGrade());
             
             // Save student and get the complete saved entity
             Student savedStudent = studentService.saveStudent(newStudent);
@@ -71,7 +86,10 @@ public class StudentEndpoint {
             
             // Create response with complete student data
             AddStudentResponse response = new AddStudentResponse();
-            response.setStudent(savedStudent);
+            response.setId(savedStudent.getId());
+            response.setName(savedStudent.getName());
+            response.setAge(savedStudent.getAge());
+            response.setGrade(savedStudent.getGrade());
             
             logger.debug("Returning response with student: id={}, name={}, age={}, grade={}", 
                 savedStudent.getId(), savedStudent.getName(), savedStudent.getAge(), savedStudent.getGrade());

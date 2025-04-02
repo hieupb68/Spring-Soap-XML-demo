@@ -8,19 +8,19 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "studentId"
+    "id"
 })
 @XmlRootElement(name = "getStudentRequest", namespace = "http://example.com/student")
 public class GetStudentRequest {
 
-    @XmlElement(required = true)
-    protected Long studentId;
+    @XmlElement(name = "id", required = true)
+    protected Long id;
 
-    public Long getStudentId() {
-        return studentId;
+    public Long getId() {
+        return id;
     }
 
-    public void setStudentId(Long value) {
-        this.studentId = value;
+    public void setId(Long value) {
+        this.id = value;
     }
 } 
